@@ -162,6 +162,7 @@ Public Class EventLogProcessor
     Class OneEventRecord
         Public RowID As Long
         Public DateTime As Date
+        Public IDRRef As Decimal
         Public ConnectID As Integer
         Public Severity As Integer
         Public TransactionStatus As String
@@ -688,7 +689,7 @@ Public Class EventLogProcessor
             objConn.Open()
 
             Dim dt = New DataTable
-            For jj = 1 To 19
+            For jj = 1 To 20
                 dt.Columns.Add(New DataColumn())
             Next
 
@@ -696,10 +697,11 @@ Public Class EventLogProcessor
 
                 If Ev.AppName = Nothing Then Continue For
 
-                Dim Data(18)
+                Dim Data(19)
 
                 'Select [InfobaseCode]
                 '    ,[DateTime]
+                '    ,[IDRRef]
                 '    ,[TransactionStatus]
                 '    ,[TransactionStartTime]
                 '    ,[TransactionMark]
@@ -721,23 +723,24 @@ Public Class EventLogProcessor
 
                 Data(0) = InfobaseID
                 Data(1) = Ev.DateTime
-                Data(2) = Ev.TransactionStatus
-                Data(3) = Ev.TransactionStartTime
-                Data(4) = Ev.TransactionMark
-                Data(5) = Ev.Transaction
-                Data(6) = Ev.UserName
-                Data(7) = Ev.ComputerName
-                Data(8) = Ev.AppName
-                Data(9) = Ev.EventID
-                Data(10) = Ev.EventType
-                Data(11) = Ev.Comment
-                Data(12) = Ev.MetadataID
-                Data(13) = Ev.DataStructure
-                Data(14) = Ev.DataString
-                Data(15) = Ev.ServerID
-                Data(16) = Ev.MainPortID
-                Data(17) = Ev.SecondPortID
-                Data(18) = Ev.SessionNumber
+                Data(2) = Ev.IDRRef
+                Data(3) = Ev.TransactionStatus
+                Data(4) = Ev.TransactionStartTime
+                Data(5) = Ev.TransactionMark
+                Data(6) = Ev.Transaction
+                Data(7) = Ev.UserName
+                Data(8) = Ev.ComputerName
+                Data(9) = Ev.AppName
+                Data(10) = Ev.EventID
+                Data(11) = Ev.EventType
+                Data(12) = Ev.Comment
+                Data(13) = Ev.MetadataID
+                Data(14) = Ev.DataStructure
+                Data(15) = Ev.DataString
+                Data(16) = Ev.ServerID
+                Data(17) = Ev.MainPortID
+                Data(18) = Ev.SecondPortID
+                Data(19) = Ev.SessionNumber
 
                 Dim row As DataRow = dt.NewRow()
                 row.ItemArray = Data
@@ -746,7 +749,7 @@ Public Class EventLogProcessor
             Next
 
             Using copy As New SqlBulkCopy(objConn)
-                For jj = 0 To 18
+                For jj = 0 To 19
                     copy.ColumnMappings.Add(jj, jj)
                 Next
                 copy.DestinationTableName = "Events"
@@ -768,10 +771,10 @@ Public Class EventLogProcessor
             Dim command As New MySqlCommand("START TRANSACTION", objConn)
             command.ExecuteNonQuery()
 
-            command.CommandText = "INSERT INTO `Events` (`InfobaseCode`,`DateTime`,`TransactionStatus`,`Transaction`,`UserName`,`ComputerName`" +
+            command.CommandText = "INSERT INTO `Events` (`InfobaseCode`,`DateTime`,`IDRRef`,`TransactionStatus`,`Transaction`,`UserName`,`ComputerName`" +
                                       ",`AppName`,`EventID`,`EventType`,`Comment`,`MetadataID`,`DataStructure`,`DataString`" +
                                       ",`ServerID`,`MainPortID`,`SecondPortID`,`Seance`,`TransactionStartTime`,`TransactionMark`)" +
-                                      " VALUES(@v0,@v1,@v2,@v3,@v4,@v5,@v6,@v7,@v8,@v9,@v10,@v11,@v12,@v13,@v14,@v15,@v16,@v17,@v18)"
+                                      " VALUES(@v0,@v1,@v2,@v3,@v4,@v5,@v6,@v7,@v8,@v9,@v10,@v11,@v12,@v13,@v14,@v15,@v16,@v17,@v18,@v19)"
 
             Dim i = 0
             For Each Ev In EventsList
@@ -782,23 +785,24 @@ Public Class EventLogProcessor
                     command.Parameters.Clear()
                     command.Parameters.Add(New MySqlParameter("@v0", MySqlDbType.Int32)).Value = InfobaseID
                     command.Parameters.Add(New MySqlParameter("@v1", MySqlDbType.DateTime)).Value = Ev.DateTime
-                    command.Parameters.Add(New MySqlParameter("@v2", MySqlDbType.VarChar)).Value = Ev.TransactionStatus
-                    command.Parameters.Add(New MySqlParameter("@v3", MySqlDbType.VarChar)).Value = Ev.Transaction
-                    command.Parameters.Add(New MySqlParameter("@v4", MySqlDbType.Int32)).Value = Ev.UserName
-                    command.Parameters.Add(New MySqlParameter("@v5", MySqlDbType.Int32)).Value = Ev.ComputerName
-                    command.Parameters.Add(New MySqlParameter("@v6", MySqlDbType.Int32)).Value = Ev.AppName
-                    command.Parameters.Add(New MySqlParameter("@v7", MySqlDbType.Int32)).Value = Ev.EventID
-                    command.Parameters.Add(New MySqlParameter("@v8", MySqlDbType.VarChar)).Value = Ev.EventType
-                    command.Parameters.Add(New MySqlParameter("@v9", MySqlDbType.VarChar)).Value = Ev.Comment
-                    command.Parameters.Add(New MySqlParameter("@v10", MySqlDbType.Int32)).Value = Ev.MetadataID
-                    command.Parameters.Add(New MySqlParameter("@v11", MySqlDbType.VarChar)).Value = Ev.DataStructure
-                    command.Parameters.Add(New MySqlParameter("@v12", MySqlDbType.VarChar)).Value = Ev.DataString
-                    command.Parameters.Add(New MySqlParameter("@v13", MySqlDbType.Int32)).Value = Ev.ServerID
-                    command.Parameters.Add(New MySqlParameter("@v14", MySqlDbType.Int32)).Value = Ev.MainPortID
-                    command.Parameters.Add(New MySqlParameter("@v15", MySqlDbType.Int32)).Value = Ev.SecondPortID
-                    command.Parameters.Add(New MySqlParameter("@v16", MySqlDbType.Int32)).Value = Ev.SessionNumber
-                    command.Parameters.Add(New MySqlParameter("@v17", MySqlDbType.DateTime)).Value = Ev.TransactionStartTime
-                    command.Parameters.Add(New MySqlParameter("@v18", MySqlDbType.Int64)).Value = Ev.TransactionMark
+                    command.Parameters.Add(New MySqlParameter("@v2", MySqlDbType.Decimal)).Value = Ev.IDRRef
+                    command.Parameters.Add(New MySqlParameter("@v3", MySqlDbType.VarChar)).Value = Ev.TransactionStatus
+                    command.Parameters.Add(New MySqlParameter("@v4", MySqlDbType.VarChar)).Value = Ev.Transaction
+                    command.Parameters.Add(New MySqlParameter("@v5", MySqlDbType.Int32)).Value = Ev.UserName
+                    command.Parameters.Add(New MySqlParameter("@v6", MySqlDbType.Int32)).Value = Ev.ComputerName
+                    command.Parameters.Add(New MySqlParameter("@v7", MySqlDbType.Int32)).Value = Ev.AppName
+                    command.Parameters.Add(New MySqlParameter("@v8", MySqlDbType.Int32)).Value = Ev.EventID
+                    command.Parameters.Add(New MySqlParameter("@v9", MySqlDbType.VarChar)).Value = Ev.EventType
+                    command.Parameters.Add(New MySqlParameter("@v10", MySqlDbType.VarChar)).Value = Ev.Comment
+                    command.Parameters.Add(New MySqlParameter("@v11", MySqlDbType.Int32)).Value = Ev.MetadataID
+                    command.Parameters.Add(New MySqlParameter("@v12", MySqlDbType.VarChar)).Value = Ev.DataStructure
+                    command.Parameters.Add(New MySqlParameter("@v13", MySqlDbType.VarChar)).Value = Ev.DataString
+                    command.Parameters.Add(New MySqlParameter("@v14", MySqlDbType.Int32)).Value = Ev.ServerID
+                    command.Parameters.Add(New MySqlParameter("@v15", MySqlDbType.Int32)).Value = Ev.MainPortID
+                    command.Parameters.Add(New MySqlParameter("@v16", MySqlDbType.Int32)).Value = Ev.SecondPortID
+                    command.Parameters.Add(New MySqlParameter("@v17", MySqlDbType.Int32)).Value = Ev.SessionNumber
+                    command.Parameters.Add(New MySqlParameter("@v18", MySqlDbType.DateTime)).Value = Ev.TransactionStartTime
+                    command.Parameters.Add(New MySqlParameter("@v19", MySqlDbType.Int64)).Value = Ev.TransactionMark
 
                     command.ExecuteNonQuery()
                     i += 1
@@ -1533,6 +1537,7 @@ Public Class EventLogProcessor
         OneEvent.MainPortID = Convert.ToInt32(Array(14))
         OneEvent.SecondPortID = Convert.ToInt32(Array(15))
         OneEvent.SessionNumber = Convert.ToInt32(Array(16))
+        OneEvent.IDRRef = ""
 
         '*************************************************************************
         'Additional parsing to make sure that data looks the same between old and new EventLog formats
@@ -1546,11 +1551,14 @@ Public Class EventLogProcessor
                     Or ParsedObject(0) = """R""" Then 'this is string or reference 
 
                     OneEvent.DataStructure = RemoveQuotes(ParsedObject(1)) 'string value
+                    OneEvent.IDRRef = ""
+                    Dim position As Integer = ParsedObject(1).IndexOf("=")
+                    If position > 0 Then
+                        OneEvent.IDRRef = ParsedObject(1).Substring(position + 1)
+                    End If
 
                 End If
-
             End If
-
         End If
 
         Select Case OneEvent.EventType
