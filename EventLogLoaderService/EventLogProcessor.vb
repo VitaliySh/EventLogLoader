@@ -162,7 +162,7 @@ Public Class EventLogProcessor
     Class OneEventRecord
         Public RowID As Long
         Public DateTime As Date
-        Public IDRRef As Decimal
+        Public IDRRef As Byte(16)
         Public ConnectID As Integer
         Public Severity As Integer
         Public TransactionStatus As String
@@ -800,7 +800,7 @@ Public Class EventLogProcessor
                     command.Parameters.Clear()
                     command.Parameters.Add(New MySqlParameter("@v0", MySqlDbType.Int32)).Value = InfobaseID
                     command.Parameters.Add(New MySqlParameter("@v1", MySqlDbType.DateTime)).Value = Ev.DateTime
-                    command.Parameters.Add(New MySqlParameter("@v2", MySqlDbType.Decimal)).Value = Ev.IDRRef
+                    'command.Parameters.Add(New MySqlParameter("@v2", MySqlDbType.Decimal)).Value = Ev.IDRRef
                     command.Parameters.Add(New MySqlParameter("@v3", MySqlDbType.VarChar)).Value = Ev.TransactionStatus
                     command.Parameters.Add(New MySqlParameter("@v4", MySqlDbType.VarChar)).Value = Ev.Transaction
                     command.Parameters.Add(New MySqlParameter("@v5", MySqlDbType.Int32)).Value = Ev.UserName
@@ -1479,6 +1479,12 @@ Public Class EventLogProcessor
 
     End Function
 
+    Private Function UnicodeStringToBytes(
+        ByVal str As String) As Byte()
+
+        Return System.Text.Encoding.Unicode.GetBytes(str)
+    End Function
+
     Public Sub AddEvent(Str As String)
 
         Dim provider As CultureInfo = CultureInfo.InvariantCulture
@@ -1516,8 +1522,7 @@ Public Class EventLogProcessor
         OneEvent.MainPortID = Convert.ToInt32(Array(14))
         OneEvent.SecondPortID = Convert.ToInt32(Array(15))
         OneEvent.SessionNumber = Convert.ToInt32(Array(16))
-        OneEvent.IDRRef = ""
-
+        OneEvent.IDRRef = UnicodeStringToBytes("0")
         '*************************************************************************
         'Additional parsing to make sure that data looks the same between old and new EventLog formats
         If OneEvent.DataStructure = "{""U""}" Then 'empty reference
@@ -1530,10 +1535,9 @@ Public Class EventLogProcessor
                     Or ParsedObject(0) = """R""" Then 'this is string or reference 
 
                     OneEvent.DataStructure = RemoveQuotes(ParsedObject(1)) 'string value
-                    OneEvent.IDRRef = ""
                     Dim position As Integer = ParsedObject(1).IndexOf("=")
                     If position > 0 Then
-                        OneEvent.IDRRef = ParsedObject(1).Substring(position + 1)
+                        OneEvent.IDRRef = UnicodeStringToBytes(ParsedObject(1).Substring(position + 1))
                     End If
 
                 End If
