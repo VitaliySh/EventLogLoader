@@ -171,7 +171,8 @@ Public Class EventLogLoaderService
 
                 Dim command As New SqlCommand("IF NOT EXISTS (select * from sysobjects where id = object_id(N'Events'))
                                                 BEGIN
-                                                  CREATE TABLE [dbo].[Events]([InfobaseCode] int Not NULL, [DateTime] [datetime] Not NULL, [IDRRef] [varbinary](16) Not NULL,
+                                                  CREATE TABLE [dbo].[Events]([InfobaseCode] int Not NULL, [DateTime] [datetime] Not NULL, 
+                                                        [IDRRef] [varbinary](16),
                                                         [TransactionStatus] [varchar](1) NULL,	
                                                         [TransactionStartTime] [datetime] NULL, 
                                               		    [TransactionMark] bigint NULL,	
@@ -189,7 +190,7 @@ Public Class EventLogLoaderService
                                               		    [MainPortID] int NULL,	
                                                         [SecondPortID] int NULL, 
                                               		    [Seance] int NULL);	
-                                                    CREATE CLUSTERED INDEX [CIX_Events] ON [dbo].[Events]([InfobaseCode], [DateTime], [IDRref])
+                                                    CREATE CLUSTERED INDEX [CIX_Events] ON [dbo].[Events]([InfobaseCode], [DateTime])
                                                 END", objConn)
                 command.ExecuteNonQuery()
 
@@ -267,7 +268,7 @@ Public Class EventLogLoaderService
                 Dim command = New MySql.Data.MySqlClient.MySqlCommand
                 command.Connection = objConn
 
-                command.CommandText = "CREATE TABLE IF NOT EXISTS `Events` (`InfobaseCode` int(11) NOT NULL, `DateTime` int(11) NOT NULL, `IDRRef` varbinary(16) NOT NULL," +
+                command.CommandText = "CREATE TABLE IF NOT EXISTS `Events` (`InfobaseCode` int(11) NOT NULL, `DateTime` int(11) NOT NULL, `IDRRef` varbinary(16)," +
                     "`TransactionStatus` varchar(1) NULL, `TransactionStartTime` datetime NULL,	" +
                     "`TransactionMark` bigint NULL, `Transaction` varchar(100) NULL,	`UserName` int(11) NULL, `ComputerName` int(11) NULL,	" +
                     "`AppName` int(11) NULL, `EventID` int(11) NULL, `EventType` varchar(1) NULL,	" +

@@ -162,7 +162,7 @@ Public Class EventLogProcessor
     Class OneEventRecord
         Public RowID As Long
         Public DateTime As Date
-        Public IDRRef As Byte(16)
+        Public IDRRef As Byte()
         Public ConnectID As Integer
         Public Severity As Integer
         Public TransactionStatus As String
@@ -704,9 +704,37 @@ Public Class EventLogProcessor
             objConn.Open()
 
             Dim dt = New DataTable
-            For jj = 1 To 20
-                dt.Columns.Add(New DataColumn())
-            Next
+            '            For jj = 1 To 20
+            '            dt.Columns.Add(New DataColumn())
+            '            Next
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+
+            'Dim column As DataColumn = New DataColumn
+            'column.DataType = System.Type.GetType("System.Byte[]")
+            'column.AllowDBNull = True
+            'column.Caption = "IDRRef"
+            'column.ColumnName = "IDRRef"
+            'dt.Columns.Add(column)
+            dt.Columns.Add(New DataColumn("IDRRef", System.Type.GetType("System.Byte[]")))
+
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn())
 
             For Each Ev In EventsList
 
@@ -786,10 +814,10 @@ Public Class EventLogProcessor
             Dim command As New MySqlCommand("START TRANSACTION", objConn)
             command.ExecuteNonQuery()
 
-            command.CommandText = "INSERT INTO `Events` (`InfobaseCode`,`DateTime`,`IDRRef`,`TransactionStatus`,`Transaction`,`UserName`,`ComputerName`" +
+            command.CommandText = "INSERT INTO `Events` (`InfobaseCode`,`DateTime`,`TransactionStatus`,`Transaction`,`UserName`,`ComputerName`" +
                                       ",`AppName`,`EventID`,`EventType`,`Comment`,`MetadataID`,`DataStructure`,`DataString`" +
                                       ",`ServerID`,`MainPortID`,`SecondPortID`,`Seance`,`TransactionStartTime`,`TransactionMark`)" +
-                                      " VALUES(@v0,@v1,@v2,@v3,@v4,@v5,@v6,@v7,@v8,@v9,@v10,@v11,@v12,@v13,@v14,@v15,@v16,@v17,@v18,@v19)"
+                                      " VALUES(@v0,@v1,@v2,@v3,@v4,@v5,@v6,@v7,@v8,@v9,@v10,@v11,@v12,@v13,@v14,@v15,@v16,@v17,@v18)"
 
             Dim i = 0
             For Each Ev In EventsList
@@ -800,24 +828,23 @@ Public Class EventLogProcessor
                     command.Parameters.Clear()
                     command.Parameters.Add(New MySqlParameter("@v0", MySqlDbType.Int32)).Value = InfobaseID
                     command.Parameters.Add(New MySqlParameter("@v1", MySqlDbType.DateTime)).Value = Ev.DateTime
-                    'command.Parameters.Add(New MySqlParameter("@v2", MySqlDbType.Decimal)).Value = Ev.IDRRef
-                    command.Parameters.Add(New MySqlParameter("@v3", MySqlDbType.VarChar)).Value = Ev.TransactionStatus
-                    command.Parameters.Add(New MySqlParameter("@v4", MySqlDbType.VarChar)).Value = Ev.Transaction
-                    command.Parameters.Add(New MySqlParameter("@v5", MySqlDbType.Int32)).Value = Ev.UserName
-                    command.Parameters.Add(New MySqlParameter("@v6", MySqlDbType.Int32)).Value = Ev.ComputerName
-                    command.Parameters.Add(New MySqlParameter("@v7", MySqlDbType.Int32)).Value = Ev.AppName
-                    command.Parameters.Add(New MySqlParameter("@v8", MySqlDbType.Int32)).Value = Ev.EventID
-                    command.Parameters.Add(New MySqlParameter("@v9", MySqlDbType.VarChar)).Value = Ev.EventType
-                    command.Parameters.Add(New MySqlParameter("@v10", MySqlDbType.VarChar)).Value = Ev.Comment
-                    command.Parameters.Add(New MySqlParameter("@v11", MySqlDbType.Int32)).Value = Ev.MetadataID
-                    command.Parameters.Add(New MySqlParameter("@v12", MySqlDbType.VarChar)).Value = Ev.DataStructure
-                    command.Parameters.Add(New MySqlParameter("@v13", MySqlDbType.VarChar)).Value = Ev.DataString
-                    command.Parameters.Add(New MySqlParameter("@v14", MySqlDbType.Int32)).Value = Ev.ServerID
-                    command.Parameters.Add(New MySqlParameter("@v15", MySqlDbType.Int32)).Value = Ev.MainPortID
-                    command.Parameters.Add(New MySqlParameter("@v16", MySqlDbType.Int32)).Value = Ev.SecondPortID
-                    command.Parameters.Add(New MySqlParameter("@v17", MySqlDbType.Int32)).Value = Ev.SessionNumber
-                    command.Parameters.Add(New MySqlParameter("@v18", MySqlDbType.DateTime)).Value = Ev.TransactionStartTime
-                    command.Parameters.Add(New MySqlParameter("@v19", MySqlDbType.Int64)).Value = Ev.TransactionMark
+                    command.Parameters.Add(New MySqlParameter("@v2", MySqlDbType.VarChar)).Value = Ev.TransactionStatus
+                    command.Parameters.Add(New MySqlParameter("@v3", MySqlDbType.VarChar)).Value = Ev.Transaction
+                    command.Parameters.Add(New MySqlParameter("@v4", MySqlDbType.Int32)).Value = Ev.UserName
+                    command.Parameters.Add(New MySqlParameter("@v5", MySqlDbType.Int32)).Value = Ev.ComputerName
+                    command.Parameters.Add(New MySqlParameter("@v6", MySqlDbType.Int32)).Value = Ev.AppName
+                    command.Parameters.Add(New MySqlParameter("@v7", MySqlDbType.Int32)).Value = Ev.EventID
+                    command.Parameters.Add(New MySqlParameter("@v8", MySqlDbType.VarChar)).Value = Ev.EventType
+                    command.Parameters.Add(New MySqlParameter("@v9", MySqlDbType.VarChar)).Value = Ev.Comment
+                    command.Parameters.Add(New MySqlParameter("@v10", MySqlDbType.Int32)).Value = Ev.MetadataID
+                    command.Parameters.Add(New MySqlParameter("@v11", MySqlDbType.VarChar)).Value = Ev.DataStructure
+                    command.Parameters.Add(New MySqlParameter("@v12", MySqlDbType.VarChar)).Value = Ev.DataString
+                    command.Parameters.Add(New MySqlParameter("@v13", MySqlDbType.Int32)).Value = Ev.ServerID
+                    command.Parameters.Add(New MySqlParameter("@v14", MySqlDbType.Int32)).Value = Ev.MainPortID
+                    command.Parameters.Add(New MySqlParameter("@v15", MySqlDbType.Int32)).Value = Ev.SecondPortID
+                    command.Parameters.Add(New MySqlParameter("@v16", MySqlDbType.Int32)).Value = Ev.SessionNumber
+                    command.Parameters.Add(New MySqlParameter("@v17", MySqlDbType.DateTime)).Value = Ev.TransactionStartTime
+                    command.Parameters.Add(New MySqlParameter("@v18", MySqlDbType.Int64)).Value = Ev.TransactionMark
 
                     command.ExecuteNonQuery()
                     i += 1
@@ -1479,10 +1506,46 @@ Public Class EventLogProcessor
 
     End Function
 
-    Private Function UnicodeStringToBytes(
-        ByVal str As String) As Byte()
+    Private Function Between(value As String, a As String,
+                     b As String) As String
+        ' Get positions for both string arguments.
+        Dim posA As Integer = value.IndexOf(a)
+        Dim posB As Integer = value.LastIndexOf(b)
+        If posA = -1 Then
+            Return ""
+        End If
+        If posB = -1 Then
+            Return ""
+        End If
 
-        Return System.Text.Encoding.Unicode.GetBytes(str)
+        Dim adjustedPosA As Integer = posA + a.Length
+        If adjustedPosA >= posB Then
+            Return ""
+        End If
+
+        ' Get the substring between the two positions.
+        Return value.Substring(adjustedPosA, posB - adjustedPosA)
+    End Function
+
+    Public Shared Function HexStringToBytes(ByVal str As String) As Byte()
+        Dim hexDigits As String = "0123456789ABCDEF"
+        ' Determine the number of bytes 
+        Dim bytes((str.Length >> 1) - 1) As Byte
+        For i As Integer = 0 To str.Length - 1 Step 2
+            Dim highDigit As Integer = hexDigits.IndexOf(Char.ToUpperInvariant(str.Chars(i)))
+            Dim lowDigit As Integer = hexDigits.IndexOf(Char.ToUpperInvariant(str.Chars(i + 1)))
+            If highDigit = -1 OrElse lowDigit = -1 Then
+                Throw New ArgumentException("The string contains an invalid digit.", "s")
+            End If
+            bytes(i >> 1) = CByte((highDigit << 4) Or lowDigit)
+        Next i
+        Return bytes
+    End Function
+
+    Private Function GetIDRRefFromDataStructure(
+        ByVal DataStructure As String) As Byte()
+
+        Return HexStringToBytes(Between(DataStructure, ":", "}"))
     End Function
 
     Public Sub AddEvent(Str As String)
@@ -1522,24 +1585,22 @@ Public Class EventLogProcessor
         OneEvent.MainPortID = Convert.ToInt32(Array(14))
         OneEvent.SecondPortID = Convert.ToInt32(Array(15))
         OneEvent.SessionNumber = Convert.ToInt32(Array(16))
-        OneEvent.IDRRef = UnicodeStringToBytes("0")
         '*************************************************************************
         'Additional parsing to make sure that data looks the same between old and new EventLog formats
         If OneEvent.DataStructure = "{""U""}" Then 'empty reference
             OneEvent.DataStructure = ""
         ElseIf OneEvent.DataStructure.StartsWith("{") Then
             'internal representation for different objects.
-            Dim ParsedObject = ParserServices.ParseEventlogString(OneEvent.DataStructure)
+            Dim ParsedObject = ParserServices.ParseEventLogString(OneEvent.DataStructure)
             If ParsedObject.Length = 2 Then
                 If ParsedObject(0) = """S""" _
                     Or ParsedObject(0) = """R""" Then 'this is string or reference 
 
                     OneEvent.DataStructure = RemoveQuotes(ParsedObject(1)) 'string value
-                    Dim position As Integer = ParsedObject(1).IndexOf("=")
-                    If position > 0 Then
-                        OneEvent.IDRRef = UnicodeStringToBytes(ParsedObject(1).Substring(position + 1))
-                    End If
 
+                End If
+                If ParsedObject(0) = "R" Then
+                    OneEvent.IDRRef = GetIDRRefFromDataStructure(OneEvent.DataStructure)
                 End If
             End If
         End If
