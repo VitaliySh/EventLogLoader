@@ -704,37 +704,26 @@ Public Class EventLogProcessor
             objConn.Open()
 
             Dim dt = New DataTable
-            '            For jj = 1 To 20
-            '            dt.Columns.Add(New DataColumn())
-            '            Next
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-
-            'Dim column As DataColumn = New DataColumn
-            'column.DataType = System.Type.GetType("System.Byte[]")
-            'column.AllowDBNull = True
-            'column.Caption = "IDRRef"
-            'column.ColumnName = "IDRRef"
-            'dt.Columns.Add(column)
+            dt.Columns.Add(New DataColumn("InfobaseCode"))
+            dt.Columns.Add(New DataColumn("DateTime"))
             dt.Columns.Add(New DataColumn("IDRRef", System.Type.GetType("System.Byte[]")))
-
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
-            dt.Columns.Add(New DataColumn())
+            dt.Columns.Add(New DataColumn("TransactionStatus"))
+            dt.Columns.Add(New DataColumn("TransactionStartTime"))
+            dt.Columns.Add(New DataColumn("TransactionMark"))
+            dt.Columns.Add(New DataColumn("Transaction"))
+            dt.Columns.Add(New DataColumn("UserName"))
+            dt.Columns.Add(New DataColumn("ComputerName"))
+            dt.Columns.Add(New DataColumn("AppName"))
+            dt.Columns.Add(New DataColumn("EventID"))
+            dt.Columns.Add(New DataColumn("EventType"))
+            dt.Columns.Add(New DataColumn("Comment"))
+            dt.Columns.Add(New DataColumn("MetadataID"))
+            dt.Columns.Add(New DataColumn("DataStructure"))
+            dt.Columns.Add(New DataColumn("DataString"))
+            dt.Columns.Add(New DataColumn("ServerID"))
+            dt.Columns.Add(New DataColumn("MainPortID"))
+            dt.Columns.Add(New DataColumn("SecondPortID"))
+            dt.Columns.Add(New DataColumn("Seance"))
 
             For Each Ev In EventsList
 
@@ -816,8 +805,8 @@ Public Class EventLogProcessor
 
             command.CommandText = "INSERT INTO `Events` (`InfobaseCode`,`DateTime`,`TransactionStatus`,`Transaction`,`UserName`,`ComputerName`" +
                                       ",`AppName`,`EventID`,`EventType`,`Comment`,`MetadataID`,`DataStructure`,`DataString`" +
-                                      ",`ServerID`,`MainPortID`,`SecondPortID`,`Seance`,`TransactionStartTime`,`TransactionMark`)" +
-                                      " VALUES(@v0,@v1,@v2,@v3,@v4,@v5,@v6,@v7,@v8,@v9,@v10,@v11,@v12,@v13,@v14,@v15,@v16,@v17,@v18)"
+                                      ",`ServerID`,`MainPortID`,`SecondPortID`,`Seance`,`TransactionStartTime`,`TransactionMark`,`IDRRef`)" +
+                                      " VALUES(@v0,@v1,@v2,@v3,@v4,@v5,@v6,@v7,@v8,@v9,@v10,@v11,@v12,@v13,@v14,@v15,@v16,@v17,@v18,@v19)"
 
             Dim i = 0
             For Each Ev In EventsList
@@ -845,6 +834,7 @@ Public Class EventLogProcessor
                     command.Parameters.Add(New MySqlParameter("@v16", MySqlDbType.Int32)).Value = Ev.SessionNumber
                     command.Parameters.Add(New MySqlParameter("@v17", MySqlDbType.DateTime)).Value = Ev.TransactionStartTime
                     command.Parameters.Add(New MySqlParameter("@v18", MySqlDbType.Int64)).Value = Ev.TransactionMark
+                    command.Parameters.Add(New MySqlParameter("@v19", MySqlDbType.VarBinary)).Value = Ev.IDRRef
 
                     command.ExecuteNonQuery()
                     i += 1
