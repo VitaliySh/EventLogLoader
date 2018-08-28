@@ -62,7 +62,17 @@ Public Class EventLogLoaderService
                     EventLogProcessorObj.ItIsMySQL = ItIsMySQL
                     EventLogProcessorObj.ItIsES = ItIsES
                     EventLogProcessorObj.ESIndexName = ConfigSettingObj.ESIndexName
+                    EventLogProcessorObj.ESIndexPostfix = ConfigSettingObj.ESUseIndexPostfix
                     EventLogProcessorObj.ESServerName = IBConfig.ESServerName
+                    EventLogProcessorObj.ESUseSynonymsForFieldsNames = ConfigSettingObj.ESUseSynonymsForFieldsNames
+                    EventLogProcessorObj.ESFieldSynonyms = ConfigSettingObj.ESFieldSynonyms
+
+                    Try
+                        EventLogProcessorObj.LoadEventsStartingAt = Date.Parse(IBConfig.StartDate)
+                    Catch ex As Exception
+                        EventLogProcessorObj.LoadEventsStartingAt = New Date(1900, 1, 1)
+                    End Try
+
 
                     ListOfProcessors.Add(EventLogProcessorObj)
 
@@ -73,7 +83,7 @@ Public Class EventLogLoaderService
                 Log.Error("File config.json was not found!")
             End If
         Catch ex As Exception
-            Log.Error(ex, "Parameters cannot be load from config.json file (it may be corrupted)")
+            Log.Error(ex, "Parameters cannot be loaded from config.json (it may be corrupted)")
         End Try
 
 

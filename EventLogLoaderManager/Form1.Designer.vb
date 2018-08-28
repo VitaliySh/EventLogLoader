@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class Form1
     Inherits System.Windows.Forms.Form
 
     'Форма переопределяет dispose для очистки списка компонентов.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class Form1
     'Примечание: следующая процедура является обязательной для конструктора форм Windows Forms
     'Для ее изменения используйте конструктор форм Windows Form.  
     'Не изменяйте ее в редакторе исходного кода.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Me.ListView = New System.Windows.Forms.ListView()
@@ -30,10 +30,10 @@ Partial Class Form1
         Me.IBEvLogSize = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.InfobaseLogPath = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.ESServerName = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.StartAt = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.ConnectionStringBox = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.Button4 = New System.Windows.Forms.Button()
-        Me.Label3 = New System.Windows.Forms.Label()
         Me.ESIndexNameTextBox = New System.Windows.Forms.TextBox()
         Me.DBType = New System.Windows.Forms.ComboBox()
         Me.Button6 = New System.Windows.Forms.Button()
@@ -45,23 +45,29 @@ Partial Class Form1
         Me.Button2 = New System.Windows.Forms.Button()
         Me.RepeatTime = New System.Windows.Forms.TextBox()
         Me.Label4 = New System.Windows.Forms.Label()
-        Me.LinkLabel2 = New System.Windows.Forms.LinkLabel()
         Me.LinkLabel1 = New System.Windows.Forms.LinkLabel()
         Me.LinkLabel3 = New System.Windows.Forms.LinkLabel()
         Me.Label5 = New System.Windows.Forms.Label()
+        Me.UseSynonymsForFieldsNamesCheckBox = New System.Windows.Forms.CheckBox()
+        Me.Label6 = New System.Windows.Forms.Label()
+        Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.LabelIndexNameExample = New System.Windows.Forms.Label()
+        Me.CheckBoxSplitIndexByPeriods = New System.Windows.Forms.CheckBox()
+        Me.ComboBoxESIndexPostfix = New System.Windows.Forms.ComboBox()
         Me.GroupBox1.SuspendLayout()
+        Me.GroupBox2.SuspendLayout()
         Me.SuspendLayout()
         '
         'ListView
         '
         Me.ListView.CheckBoxes = True
-        Me.ListView.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.InfobaseName, Me.InfobaseGUID, Me.InfobaseDescription, Me.IBEvLogSize, Me.InfobaseLogPath, Me.ESServerName})
+        Me.ListView.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.InfobaseName, Me.InfobaseGUID, Me.InfobaseDescription, Me.IBEvLogSize, Me.InfobaseLogPath, Me.ESServerName, Me.StartAt})
         Me.ListView.Dock = System.Windows.Forms.DockStyle.Fill
         Me.ListView.FullRowSelect = True
         Me.ListView.GridLines = True
         Me.ListView.Location = New System.Drawing.Point(3, 20)
         Me.ListView.Name = "ListView"
-        Me.ListView.Size = New System.Drawing.Size(744, 327)
+        Me.ListView.Size = New System.Drawing.Size(746, 273)
         Me.ListView.TabIndex = 1
         Me.ListView.UseCompatibleStateImageBehavior = False
         Me.ListView.View = System.Windows.Forms.View.Details
@@ -101,54 +107,46 @@ Partial Class Form1
         Me.ESServerName.Text = "Имя сервера для ES"
         Me.ESServerName.Width = 180
         '
+        'StartAt
+        '
+        Me.StartAt.Text = "Начальная дата"
+        Me.StartAt.Width = 150
+        '
         'ConnectionStringBox
         '
         Me.ConnectionStringBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.ConnectionStringBox.Location = New System.Drawing.Point(123, 24)
         Me.ConnectionStringBox.Name = "ConnectionStringBox"
-        Me.ConnectionStringBox.Size = New System.Drawing.Size(525, 20)
+        Me.ConnectionStringBox.Size = New System.Drawing.Size(527, 20)
         Me.ConnectionStringBox.TabIndex = 2
         '
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(204, Byte))
+        Me.Label1.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(204, Byte))
         Me.Label1.ForeColor = System.Drawing.Color.Maroon
         Me.Label1.Location = New System.Drawing.Point(4, 4)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(450, 17)
+        Me.Label1.Size = New System.Drawing.Size(402, 17)
         Me.Label1.TabIndex = 3
         Me.Label1.Text = "Строка соединения с базой данных для записи событий ЖР"
         '
         'Button4
         '
         Me.Button4.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Button4.Location = New System.Drawing.Point(654, 24)
+        Me.Button4.Location = New System.Drawing.Point(656, 24)
         Me.Button4.Name = "Button4"
         Me.Button4.Size = New System.Drawing.Size(75, 23)
         Me.Button4.TabIndex = 4
         Me.Button4.Text = "Проверить"
         Me.Button4.UseVisualStyleBackColor = True
         '
-        'Label3
-        '
-        Me.Label3.AutoSize = True
-        Me.Label3.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(204, Byte))
-        Me.Label3.ForeColor = System.Drawing.Color.Maroon
-        Me.Label3.Location = New System.Drawing.Point(4, 74)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(197, 17)
-        Me.Label3.TabIndex = 10
-        Me.Label3.Text = "Имя индекса ElasticSearch"
-        '
         'ESIndexNameTextBox
         '
-        Me.ESIndexNameTextBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.ESIndexNameTextBox.Location = New System.Drawing.Point(449, 74)
+        Me.ESIndexNameTextBox.Location = New System.Drawing.Point(107, 21)
         Me.ESIndexNameTextBox.Name = "ESIndexNameTextBox"
-        Me.ESIndexNameTextBox.Size = New System.Drawing.Size(199, 20)
+        Me.ESIndexNameTextBox.Size = New System.Drawing.Size(169, 24)
         Me.ESIndexNameTextBox.TabIndex = 9
         '
         'DBType
@@ -179,11 +177,11 @@ Partial Class Form1
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.GroupBox1.Controls.Add(Me.ListView)
-        Me.GroupBox1.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(204, Byte))
+        Me.GroupBox1.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(204, Byte))
         Me.GroupBox1.ForeColor = System.Drawing.Color.Maroon
-        Me.GroupBox1.Location = New System.Drawing.Point(4, 100)
+        Me.GroupBox1.Location = New System.Drawing.Point(4, 154)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(750, 350)
+        Me.GroupBox1.Size = New System.Drawing.Size(752, 296)
         Me.GroupBox1.TabIndex = 5
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Обнаруженные информационные базы 1С"
@@ -191,11 +189,11 @@ Partial Class Form1
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(204, Byte))
+        Me.Label2.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(204, Byte))
         Me.Label2.ForeColor = System.Drawing.Color.Maroon
         Me.Label2.Location = New System.Drawing.Point(4, 49)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(439, 17)
+        Me.Label2.Size = New System.Drawing.Size(389, 17)
         Me.Label2.TabIndex = 3
         Me.Label2.Text = "Интервал между циклами чтения событий из ЖР (секунд)"
         '
@@ -257,7 +255,7 @@ Partial Class Form1
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RepeatTime.Location = New System.Drawing.Point(449, 49)
         Me.RepeatTime.Name = "RepeatTime"
-        Me.RepeatTime.Size = New System.Drawing.Size(199, 20)
+        Me.RepeatTime.Size = New System.Drawing.Size(156, 20)
         Me.RepeatTime.TabIndex = 2
         '
         'Label4
@@ -269,17 +267,6 @@ Partial Class Form1
         Me.Label4.Size = New System.Drawing.Size(223, 13)
         Me.Label4.TabIndex = 22
         Me.Label4.Text = "Описание и страница для обратной связи:"
-        '
-        'LinkLabel2
-        '
-        Me.LinkLabel2.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.LinkLabel2.AutoSize = True
-        Me.LinkLabel2.Location = New System.Drawing.Point(660, 530)
-        Me.LinkLabel2.Name = "LinkLabel2"
-        Me.LinkLabel2.Size = New System.Drawing.Size(102, 13)
-        Me.LinkLabel2.TabIndex = 20
-        Me.LinkLabel2.TabStop = True
-        Me.LinkLabel2.Text = "© Aleksey.Bochkov"
         '
         'LinkLabel1
         '
@@ -313,18 +300,84 @@ Partial Class Form1
         Me.Label5.TabIndex = 22
         Me.Label5.Text = "Исходные коды (по GPL лицензии):"
         '
+        'UseSynonymsForFieldsNamesCheckBox
+        '
+        Me.UseSynonymsForFieldsNamesCheckBox.AutoSize = True
+        Me.UseSynonymsForFieldsNamesCheckBox.ForeColor = System.Drawing.Color.Black
+        Me.UseSynonymsForFieldsNamesCheckBox.Location = New System.Drawing.Point(13, 50)
+        Me.UseSynonymsForFieldsNamesCheckBox.Name = "UseSynonymsForFieldsNamesCheckBox"
+        Me.UseSynonymsForFieldsNamesCheckBox.Size = New System.Drawing.Size(237, 21)
+        Me.UseSynonymsForFieldsNamesCheckBox.TabIndex = 23
+        Me.UseSynonymsForFieldsNamesCheckBox.Text = "Использовать свои имена полей"
+        Me.UseSynonymsForFieldsNamesCheckBox.UseVisualStyleBackColor = True
+        '
+        'Label6
+        '
+        Me.Label6.ForeColor = System.Drawing.Color.Black
+        Me.Label6.Location = New System.Drawing.Point(6, 23)
+        Me.Label6.Name = "Label6"
+        Me.Label6.Size = New System.Drawing.Size(96, 22)
+        Me.Label6.TabIndex = 24
+        Me.Label6.Text = "Имя индекса"
+        '
+        'GroupBox2
+        '
+        Me.GroupBox2.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.GroupBox2.Controls.Add(Me.LabelIndexNameExample)
+        Me.GroupBox2.Controls.Add(Me.CheckBoxSplitIndexByPeriods)
+        Me.GroupBox2.Controls.Add(Me.ComboBoxESIndexPostfix)
+        Me.GroupBox2.Controls.Add(Me.Label6)
+        Me.GroupBox2.Controls.Add(Me.ESIndexNameTextBox)
+        Me.GroupBox2.Controls.Add(Me.UseSynonymsForFieldsNamesCheckBox)
+        Me.GroupBox2.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.GroupBox2.ForeColor = System.Drawing.Color.Maroon
+        Me.GroupBox2.Location = New System.Drawing.Point(6, 70)
+        Me.GroupBox2.Name = "GroupBox2"
+        Me.GroupBox2.Size = New System.Drawing.Size(750, 78)
+        Me.GroupBox2.TabIndex = 25
+        Me.GroupBox2.TabStop = False
+        Me.GroupBox2.Text = "Параметры для ElasticSearch"
+        '
+        'LabelIndexNameExample
+        '
+        Me.LabelIndexNameExample.AutoSize = True
+        Me.LabelIndexNameExample.Location = New System.Drawing.Point(283, 51)
+        Me.LabelIndexNameExample.Name = "LabelIndexNameExample"
+        Me.LabelIndexNameExample.Size = New System.Drawing.Size(166, 17)
+        Me.LabelIndexNameExample.TabIndex = 28
+        Me.LabelIndexNameExample.Text = "Пример имени индекса: "
+        '
+        'CheckBoxSplitIndexByPeriods
+        '
+        Me.CheckBoxSplitIndexByPeriods.AutoSize = True
+        Me.CheckBoxSplitIndexByPeriods.ForeColor = System.Drawing.Color.Black
+        Me.CheckBoxSplitIndexByPeriods.Location = New System.Drawing.Point(283, 23)
+        Me.CheckBoxSplitIndexByPeriods.Name = "CheckBoxSplitIndexByPeriods"
+        Me.CheckBoxSplitIndexByPeriods.Size = New System.Drawing.Size(329, 21)
+        Me.CheckBoxSplitIndexByPeriods.TabIndex = 27
+        Me.CheckBoxSplitIndexByPeriods.Text = "Разделять индекс по периодам с постфиксом:"
+        Me.CheckBoxSplitIndexByPeriods.UseVisualStyleBackColor = True
+        '
+        'ComboBoxESIndexPostfix
+        '
+        Me.ComboBoxESIndexPostfix.FormattingEnabled = True
+        Me.ComboBoxESIndexPostfix.Items.AddRange(New Object() {"yyyy", "yyyyMM", "yyyyMMdd", "yyyyMMddHH"})
+        Me.ComboBoxESIndexPostfix.Location = New System.Drawing.Point(618, 22)
+        Me.ComboBoxESIndexPostfix.Name = "ComboBoxESIndexPostfix"
+        Me.ComboBoxESIndexPostfix.Size = New System.Drawing.Size(105, 24)
+        Me.ComboBoxESIndexPostfix.TabIndex = 26
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(766, 547)
+        Me.ClientSize = New System.Drawing.Size(768, 547)
+        Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.Label4)
-        Me.Controls.Add(Me.LinkLabel2)
         Me.Controls.Add(Me.LinkLabel3)
         Me.Controls.Add(Me.LinkLabel1)
-        Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.ESIndexNameTextBox)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.DBType)
         Me.Controls.Add(Me.ConnectionStringBox)
@@ -342,6 +395,8 @@ Partial Class Form1
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Form1"
         Me.GroupBox1.ResumeLayout(False)
+        Me.GroupBox2.ResumeLayout(False)
+        Me.GroupBox2.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -364,12 +419,17 @@ Partial Class Form1
     Friend WithEvents InfobaseLogPath As System.Windows.Forms.ColumnHeader
     Friend WithEvents DBType As System.Windows.Forms.ComboBox
     Friend WithEvents ButtonAddPath As System.Windows.Forms.Button
-    Friend WithEvents Label3 As Label
     Friend WithEvents ESIndexNameTextBox As TextBox
     Friend WithEvents ESServerName As ColumnHeader
     Friend WithEvents Label4 As Label
-    Friend WithEvents LinkLabel2 As LinkLabel
     Friend WithEvents LinkLabel1 As LinkLabel
     Friend WithEvents LinkLabel3 As LinkLabel
     Friend WithEvents Label5 As Label
+    Friend WithEvents UseSynonymsForFieldsNamesCheckBox As CheckBox
+    Friend WithEvents Label6 As Label
+    Friend WithEvents StartAt As ColumnHeader
+    Friend WithEvents GroupBox2 As GroupBox
+    Friend WithEvents LabelIndexNameExample As Label
+    Friend WithEvents CheckBoxSplitIndexByPeriods As CheckBox
+    Friend WithEvents ComboBoxESIndexPostfix As ComboBox
 End Class

@@ -14,6 +14,15 @@ Public Class Form1
 
     Dim ConfigSetting As ConfigSetting = New ConfigSetting
 
+    Public Sub New()
+
+        ' This call is required by the designer.
+        InitializeComponent()
+
+        ' Add any initialization after the InitializeComponent() call.
+
+    End Sub
+
     Sub LoadConfigSetting()
 
         ConfigSetting = ConfigSettingsModule.LoadConfigSettingFromFile(PathConfigFile)
@@ -33,10 +42,85 @@ Public Class Form1
             End If
         End If
 
+        'Check synonyms list
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.Application) Then
+            ConfigSetting.ESFieldSynonyms.Application = "Приложение"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.Comment) Then
+            ConfigSetting.ESFieldSynonyms.Comment = "Комментарий"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.Computer) Then
+            ConfigSetting.ESFieldSynonyms.Computer = "Компьютер"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.ConnectID) Then
+            ConfigSetting.ESFieldSynonyms.ConnectID = "НомерСоединения"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.DatabaseName) Then
+            ConfigSetting.ESFieldSynonyms.DatabaseName = "ИнформационнаяБаза"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.DataString) Then
+            ConfigSetting.ESFieldSynonyms.DataString = "ПредставлениеДанных"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.DataStructure) Then
+            ConfigSetting.ESFieldSynonyms.DataStructure = "СтруктураДанных"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.DataType) Then
+            ConfigSetting.ESFieldSynonyms.DataType = "ТипДанных"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.DateTime) Then
+            ConfigSetting.ESFieldSynonyms.DateTime = "ДатаВремя"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.EventType) Then
+            ConfigSetting.ESFieldSynonyms.EventType = "ТипСобытия"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.Metadata) Then
+            ConfigSetting.ESFieldSynonyms.Metadata = "Метаданные"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.PrimaryPort) Then
+            ConfigSetting.ESFieldSynonyms.PrimaryPort = "ОсновнойПорт"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.RowID) Then
+            ConfigSetting.ESFieldSynonyms.RowID = "НомерСтроки"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.SecondaryPort) Then
+            ConfigSetting.ESFieldSynonyms.SecondaryPort = "ВторичныйПорт"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.Server) Then
+            ConfigSetting.ESFieldSynonyms.Server = "СерверПриложений"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.ServerName) Then
+            ConfigSetting.ESFieldSynonyms.ServerName = "Сервер1С"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.SessionDataSplitCode) Then
+            ConfigSetting.ESFieldSynonyms.SessionDataSplitCode = "Разделитель"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.SessionNumber) Then
+            ConfigSetting.ESFieldSynonyms.SessionNumber = "НомерСессии"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.Severity) Then
+            ConfigSetting.ESFieldSynonyms.Severity = "УровеньСобытия"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.UserName) Then
+            ConfigSetting.ESFieldSynonyms.UserName = "ИмяПользователя"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.Transaction) Then
+            ConfigSetting.ESFieldSynonyms.Transaction = "ТранзакцияНомер"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.TransactionStartTime) Then
+            ConfigSetting.ESFieldSynonyms.TransactionStartTime = "ТранзакцияВремя"
+        End If
+        If String.IsNullOrEmpty(ConfigSetting.ESFieldSynonyms.TransactionStatus) Then
+            ConfigSetting.ESFieldSynonyms.TransactionStatus = "ТранзакцияСтатус"
+        End If
+
         ConnectionStringBox.Text = ConfigSetting.ConnectionString
         DBType.Text = ConfigSetting.DBType
         RepeatTime.Text = ConfigSetting.RepeatTime.ToString
         ESIndexNameTextBox.Text = ConfigSetting.ESIndexName
+        UseSynonymsForFieldsNamesCheckBox.Checked = ConfigSetting.ESUseSynonymsForFieldsNames
+
+        CheckBoxSplitIndexByPeriods.Checked = Not String.IsNullOrEmpty(ConfigSetting.ESUseIndexPostfix)
+        ComboBoxESIndexPostfix.Text = ConfigSetting.ESUseIndexPostfix
 
     End Sub
 
@@ -74,9 +158,14 @@ Public Class Form1
 
     Private Sub Button1_Click(sender As System.Object, e As System.EventArgs) Handles Button1.Click
 
-        Dim ConfigSetting = New ConfigSetting
-        ConfigSetting.ConnectionString = ConnectionStringBox.Text.Trim
-        ConfigSetting.DBType = DBType.Text.Trim
+        Dim NewConfigSetting = New ConfigSetting
+        NewConfigSetting.ConnectionString = ConnectionStringBox.Text.Trim
+        NewConfigSetting.DBType = DBType.Text.Trim
+        NewConfigSetting.ESIndexName = ESIndexNameTextBox.Text
+
+        If CheckBoxSplitIndexByPeriods.Checked Then
+            NewConfigSetting.ESUseIndexPostfix = ComboBoxESIndexPostfix.Text
+        End If
 
         For Each Item As ListViewItem In ListView.Items
             If Item.Checked Then
@@ -86,18 +175,20 @@ Public Class Form1
                 IBSetting.DatabaseName = Item.SubItems(0).Text
                 IBSetting.DatabaseCatalog = Item.SubItems(4).Text
                 IBSetting.ESServerName = Item.SubItems(5).Text
+                IBSetting.StartDate = Item.SubItems(6).Text
 
-                ConfigSetting.Infobases.Add(IBSetting)
+                NewConfigSetting.Infobases.Add(IBSetting)
 
             End If
         Next
 
+        NewConfigSetting.ESUseSynonymsForFieldsNames = UseSynonymsForFieldsNamesCheckBox.Checked
+        NewConfigSetting.ESFieldSynonyms = ConfigSetting.ESFieldSynonyms
 
         Dim Rep = Convert.ToInt32(RepeatTime.Text)
 
-        ConfigSetting.RepeatTime = IIf(Rep = 0, 60, Rep)
-        ConfigSettingsModule.SaveConfigSettingToFile(ConfigSetting, PathConfigFile)
-
+        NewConfigSetting.RepeatTime = IIf(Rep = 0, 60, Rep)
+        ConfigSettingsModule.SaveConfigSettingToFile(NewConfigSetting, PathConfigFile)
 
         Dim sc = New System.ServiceProcess.ServiceController("EventLog loader service")
         Try
@@ -162,11 +253,13 @@ Public Class Form1
 
     Private Sub Form1_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
 
-        Text = My.Application.Info.ProductName + " / " + My.Application.Info.Copyright
+        Text = My.Application.Info.ProductName
 
         LoadConfigSetting()
 
         RefreshInfobaseList()
+
+        ShowIndexNameExample()
 
     End Sub
 
@@ -212,6 +305,7 @@ Public Class Form1
                     item1.SubItems.Add(a.SizeEventLog.ToString)
                     item1.SubItems.Add(a.CatalogEventLog)
                     item1.SubItems.Add(SavedIB.ESServerName) 'ESServerName
+                    item1.SubItems.Add(SavedIB.StartDate) 'StartAt
 
                     ListView.Items.Add(item1)
 
@@ -236,6 +330,7 @@ Public Class Form1
                 item1.SubItems.Add(a.SizeEventLog.ToString)
                 item1.SubItems.Add(a.CatalogEventLog)
                 item1.SubItems.Add(SavedIB.ESServerName) 'ESServerName
+                item1.SubItems.Add(SavedIB.StartDate) 'StartAt
 
                 ListView.Items.Add(item1)
 
@@ -255,6 +350,7 @@ Public Class Form1
                 item1.SubItems.Add(CalcullateFolderSize(IB.DatabaseCatalog))
                 item1.SubItems.Add(IB.DatabaseCatalog)
                 item1.SubItems.Add(IB.ESServerName)
+                item1.SubItems.Add(IB.StartDate) 'StartAt
 
                 ListView.Items.Add(item1)
             End If
@@ -423,6 +519,11 @@ Public Class Form1
             item1.SubItems.Add(CalcullateFolderSize(AddPath.Path.Text))
             item1.SubItems.Add(AddPath.Path.Text)
             item1.SubItems.Add(AddPath.ESServerNameTextBox.Text)
+            If AddPath.UseFilterByDateCheckBox.Checked Then
+                item1.SubItems.Add(AddPath.FilterByDateDateTimePicker.Value.ToString("yyyy-MM-dd"))
+            Else
+                item1.SubItems.Add("")
+            End If
 
             ListView.Items.Add(item1)
 
@@ -445,6 +546,15 @@ Public Class Form1
         AddPath.ESServerNameTextBox.Text = item.SubItems(5).Text
         AddPath.Description.Text = item.SubItems(2).Text
         AddPath.Path.Text = item.SubItems(4).Text
+
+        Dim DateStr = item.SubItems(6).Text
+        If String.IsNullOrEmpty(DateStr) Then
+            AddPath.UseFilterByDateCheckBox.Checked = False
+        Else
+            AddPath.UseFilterByDateCheckBox.Checked = True
+            AddPath.FilterByDateDateTimePicker.Value = DateTime.Parse(DateStr)
+        End If
+
         AddPath.ExistedRow = True
         AddPath.ShowDialog()
 
@@ -458,20 +568,17 @@ Public Class Form1
             item.SubItems.Add(CalcullateFolderSize(AddPath.Path.Text))
             item.SubItems.Add(AddPath.Path.Text)
             item.SubItems.Add(AddPath.ESServerNameTextBox.Text)
+            If AddPath.UseFilterByDateCheckBox.Checked Then
+                item.SubItems.Add(AddPath.FilterByDateDateTimePicker.Value.ToString("yyyy-MM-dd"))
+            Else
+                item.SubItems.Add("")
+            End If
 
         End If
 
-
-
-        'End If
-
-
-
     End Sub
 
-
-
-    Private Sub LinkLabel2_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel2.LinkClicked
+    Private Sub LinkLabel2_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs)
         Process.Start("https://github.com/alekseybochkov/")
     End Sub
 
@@ -481,5 +588,31 @@ Public Class Form1
 
     Private Sub LinkLabel3_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel3.LinkClicked
         Process.Start("https://github.com/alekseybochkov/EventLogLoader/")
+    End Sub
+
+    Private Sub ESIndexNameTextBox_TextChanged(sender As Object, e As EventArgs) Handles ESIndexNameTextBox.TextChanged
+
+        ShowIndexNameExample()
+
+    End Sub
+
+    Sub ShowIndexNameExample()
+
+        Dim Postfix = ""
+
+        If CheckBoxSplitIndexByPeriods.Checked Then
+            Postfix = Now.ToString(ComboBoxESIndexPostfix.Text)
+        End If
+
+        LabelIndexNameExample.Text = "Пример имени индекса: " + ESIndexNameTextBox.Text + Postfix
+
+    End Sub
+
+    Private Sub ComboBoxESIndexPostfix_TextChanged(sender As Object, e As EventArgs) Handles ComboBoxESIndexPostfix.TextChanged
+        ShowIndexNameExample()
+    End Sub
+
+    Private Sub CheckBoxSplitIndexByPeriods_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBoxSplitIndexByPeriods.CheckedChanged
+        ShowIndexNameExample()
     End Sub
 End Class

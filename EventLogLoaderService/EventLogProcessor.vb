@@ -206,11 +206,15 @@ Public Class EventLogProcessor
         Public SecondaryPort As Integer
         Public Server As String
         Public SessionDataSplitCode As Integer
+        Public TransactionStatus As String
+        Public Transaction As Integer
+        Public TransactionStartTime As Date
     End Class
 
     Public EventsList As List(Of OneEventRecord) = New List(Of OneEventRecord)
 
     Public ESIndexName As String
+    Public ESIndexPostfix As String
     Public ESServerName As String
 
     Public InfobaseName As String
@@ -220,6 +224,9 @@ Public Class EventLogProcessor
     Public ItIsMSSQL As Boolean = False
     Public ItIsMySQL As Boolean = False
     Public ItIsES As Boolean = False
+    Public ESUseSynonymsForFieldsNames As Boolean = False
+    Public LoadEventsStartingAt As Date
+    Public ESFieldSynonyms As ElasticSearchFieldSynonymsClass = New ElasticSearchFieldSynonymsClass
     Public SleepTime As Integer = 60 * 1000 '1 минута
 
     Public Log As NLog.Logger
@@ -845,8 +852,25 @@ Public Class EventLogProcessor
             Dim _current = New ElasticClient(_settings)
 
             'Let's create proper array for ES
-            Dim NewRecords As List(Of ESRecord) = New List(Of ESRecord)
+            Dim NewRecordsByIndex As Dictionary(Of String, List(Of Object)) = New Dictionary(Of String, List(Of Object))
+            'Dim NewRecords As List(Of Object) = New List(Of Object)
+
             For Each EventRecord In EventsList
+
+                Dim TargetIndexName = ESIndexName
+                If ESIndexPostfix.Length > 0 Then
+                    Try
+                        TargetIndexName = TargetIndexName + EventRecord.DateTime.ToString(ESIndexPostfix)
+                    Catch ex As Exception
+                    End Try
+                End If
+
+                If Not NewRecordsByIndex.ContainsKey(TargetIndexName) Then
+                    NewRecordsByIndex.Add(TargetIndexName, New List(Of Object))
+                End If
+
+
+
                 Dim ESRecord = New ESRecord With {.ServerName = ESServerName, .DatabaseName = InfobaseName}
                 ESRecord.RowID = EventRecord.RowID
 
@@ -868,9 +892,11 @@ Public Class EventLogProcessor
                 ESRecord.DataStructure = EventRecord.DataStructure
                 ESRecord.DataString = EventRecord.DataString
                 ESRecord.Comment = EventRecord.Comment
-                'ESRecord.EventTypeString = EventRecord.EventType - this is severity
                 ESRecord.SessionDataSplitCode = EventRecord.SessionDataSplitCode
 
+                ESRecord.Transaction = EventRecord.TransactionMark
+                ESRecord.TransactionStartTime = EventRecord.TransactionStartTime
+                ESRecord.TransactionStatus = EventRecord.TransactionStatus
 
                 Dim EventObj = New EventType
                 If DictEvents.TryGetValue(EventRecord.EventID, EventObj) Then
@@ -912,18 +938,140 @@ Public Class EventLogProcessor
                     ESRecord.UserName = UserNameObj
                 End If
 
-                NewRecords.Add(ESRecord)
+                If ESUseSynonymsForFieldsNames Then
+
+                    Dim ESRecordUserFields = New Dictionary(Of String, Object)
+                    ESRecordUserFields.Add(ESFieldSynonyms.ServerName, ESRecord.ServerName)
+                    ESRecordUserFields.Add(ESFieldSynonyms.DatabaseName, ESRecord.DatabaseName)
+                    ESRecordUserFields.Add(ESFieldSynonyms.RowID, ESRecord.RowID)
+                    ESRecordUserFields.Add(ESFieldSynonyms.Severity, ESRecord.Severity)
+                    ESRecordUserFields.Add(ESFieldSynonyms.DateTime, ESRecord.DateTime)
+                    ESRecordUserFields.Add(ESFieldSynonyms.ConnectID, ESRecord.ConnectID)
+                    ESRecordUserFields.Add(ESFieldSynonyms.DataType, ESRecord.DataType)
+                    ESRecordUserFields.Add(ESFieldSynonyms.SessionNumber, ESRecord.SessionNumber)
+                    ESRecordUserFields.Add(ESFieldSynonyms.DataStructure, ESRecord.DataStructure)
+                    ESRecordUserFields.Add(ESFieldSynonyms.DataString, ESRecord.DataString)
+                    ESRecordUserFields.Add(ESFieldSynonyms.Comment, ESRecord.Comment)
+                    ESRecordUserFields.Add(ESFieldSynonyms.SessionDataSplitCode, ESRecord.SessionDataSplitCode)
+                    ESRecordUserFields.Add(ESFieldSynonyms.EventType, ESRecord.EventType)
+                    ESRecordUserFields.Add(ESFieldSynonyms.Metadata, ESRecord.Metadata)
+                    ESRecordUserFields.Add(ESFieldSynonyms.Computer, ESRecord.Computer)
+                    ESRecordUserFields.Add(ESFieldSynonyms.PrimaryPort, ESRecord.PrimaryPort)
+                    ESRecordUserFields.Add(ESFieldSynonyms.Server, ESRecord.Server)
+                    ESRecordUserFields.Add(ESFieldSynonyms.SecondaryPort, ESRecord.SecondaryPort)
+                    ESRecordUserFields.Add(ESFieldSynonyms.Application, ESRecord.Application)
+                    ESRecordUserFields.Add(ESFieldSynonyms.UserName, ESRecord.UserName)
+
+                    ESRecordUserFields.Add(ESFieldSynonyms.Transaction, ESRecord.Transaction)
+                    ESRecordUserFields.Add(ESFieldSynonyms.TransactionStartTime, ESRecord.TransactionStartTime)
+                    ESRecordUserFields.Add(ESFieldSynonyms.TransactionStatus, ESRecord.TransactionStatus)
+
+                    'NewRecords.Add(ESRecordUserFields)
+                    NewRecordsByIndex(TargetIndexName).Add(ESRecordUserFields)
+
+                Else
+
+                    'NewRecords.Add(ESRecord)
+                    NewRecordsByIndex(TargetIndexName).Add(ESRecord)
+
+                End If
+
             Next
 
-            Dim Result = _current.IndexMany(NewRecords, ESIndexName, "event-log-record")
+            For Each NewRecordsKV In NewRecordsByIndex
 
-            Console.WriteLine(Now.ToShortTimeString + " New records have been processed " + NewRecords.Count.ToString)
+                Dim AttemptCount = 0
+
+                While True
+
+                    Dim Result = _current.IndexMany(NewRecordsKV.Value, NewRecordsKV.Key, "event-log-record")
+                    If Not Result.IsValid Then
+
+                        If AttemptCount >= 5 Then
+                            Throw New Exception("Writing attempts failed because <" + ConnectionString + "> server did not properly respond!")
+                        End If
+
+                        Console.WriteLine(Now.ToLongTimeString + " Error writing to the server <" + ConnectionString + ">. " + Result.OriginalException.Message + ". Waiting for 10 seconds...")
+                        Threading.Thread.Sleep(10000)
+
+                    Else
+                        Console.WriteLine(Now.ToLongTimeString + " -> " + NewRecordsKV.Value.Count.ToString + " new records have been written to '" + NewRecordsKV.Key + "' index")
+                        Exit While
+                    End If
+
+                    AttemptCount = AttemptCount + 1
+
+                End While
+
+            Next
+
+
 
             SaveReadParametersToFile()
 
         End If
 
         EventsList.Clear()
+
+    End Sub
+
+    Sub LoadReferenceFromTheTextFile(FileName As String, ByRef LastProcessedObjectForDebug As String)
+
+        Dim FS As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+        Dim SR As StreamReader = New StreamReader(FS)
+
+        'Dim TextFile = My.Computer.FileSystem.OpenTextFileReader(FileName)
+        'Dim Text = TextFile.ReadToEnd()
+        'TextFile.Close()
+        Dim Text = SR.ReadToEnd()
+        SR.Close()
+        FS.Close()
+
+        Text = Text.Substring(Text.IndexOf("{"))
+
+        Dim ObjectTexts = ParserServices.ParseEventLogString("{" + Text + "}")
+
+        For Each TextObject In ObjectTexts
+
+            LastProcessedObjectForDebug = TextObject
+
+            Dim a = ParserServices.ParseEventLogString(TextObject)
+
+            If Not a Is Nothing Then
+                Select Case a(0)
+                    Case "1"
+                        AddUser(Convert.ToInt32(a(3)), a(1), a(2))
+                    Case "2"
+                        AddComputer(Convert.ToInt32(a(2)), a(1))
+                    Case "3"
+                        AddApplication(Convert.ToInt32(a(2)), a(1))
+                    Case "4"
+                        AddEvent(Convert.ToInt32(a(2)), a(1))
+                    Case "5"
+                        AddMetadata(Convert.ToInt32(a(3)), a(1), a(2))
+                    Case "6"
+                        AddServer(Convert.ToInt32(a(2)), a(1))
+                    Case "7"
+                        AddMainPort(Convert.ToInt32(a(2)), a(1))
+                    Case "8"
+                        AddSecondPort(Convert.ToInt32(a(2)), a(1))
+                                        'Case "9" - не видел этих в файле
+                                        'Case "10"
+                    Case "11"
+                    Case "12"
+                    Case "13"
+                        'в числе последних трех должны быть статус транзакции и важность
+                    Case Else
+
+                End Select
+
+            End If
+
+
+
+        Next
+
+        SaveReferenceValuesToDatabase()
 
     End Sub
 
@@ -939,94 +1087,11 @@ Public Class EventLogProcessor
         DictMainPorts.Clear()
         DictSecondPorts.Clear()
 
-        Dim LastProcessedObjectForDebug As String = ""
+        Dim FileName = Path.Combine(Catalog, "1Cv8.lgd")
 
-        Try
-            Dim FileName = Path.Combine(Catalog, "1Cv8.lgf")
+        If My.Computer.FileSystem.FileExists(FileName) Then
 
-            If My.Computer.FileSystem.FileExists(FileName) Then
-
-                Dim FI = My.Computer.FileSystem.GetFileInfo(FileName)
-
-                If FI.LastWriteTime >= LastReferenceUpdate Then
-
-                    Dim FS As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
-                    Dim SR As StreamReader = New StreamReader(FS)
-
-                    'Dim TextFile = My.Computer.FileSystem.OpenTextFileReader(FileName)
-                    'Dim Text = TextFile.ReadToEnd()
-                    'TextFile.Close()
-                    Dim Text = SR.ReadToEnd()
-                    SR.Close()
-                    FS.Close()
-
-                    Text = Text.Substring(Text.IndexOf("{"))
-
-                    Dim ObjectTexts = ParserServices.ParseEventLogString("{" + Text + "}")
-
-                    For Each TextObject In ObjectTexts
-
-                        LastProcessedObjectForDebug = TextObject
-
-                        Dim a = ParserServices.ParseEventLogString(TextObject)
-
-                        If Not a Is Nothing Then
-                            Select Case a(0)
-                                Case "1"
-                                    AddUser(Convert.ToInt32(a(3)), a(1), a(2))
-                                Case "2"
-                                    AddComputer(Convert.ToInt32(a(2)), a(1))
-                                Case "3"
-                                    AddApplication(Convert.ToInt32(a(2)), a(1))
-                                Case "4"
-                                    AddEvent(Convert.ToInt32(a(2)), a(1))
-                                Case "5"
-                                    AddMetadata(Convert.ToInt32(a(3)), a(1), a(2))
-                                Case "6"
-                                    AddServer(Convert.ToInt32(a(2)), a(1))
-                                Case "7"
-                                    AddMainPort(Convert.ToInt32(a(2)), a(1))
-                                Case "8"
-                                    AddSecondPort(Convert.ToInt32(a(2)), a(1))
-                                        'Case "9" - не видел этих в файле
-                                        'Case "10"
-                                Case "11"
-                                Case "12"
-                                Case "13"
-                                    'в числе последних трех должны быть статус транзакции и важность
-                                Case Else
-
-                            End Select
-
-                        End If
-
-
-
-                    Next
-
-                    SaveReferenceValuesToDatabase()
-
-                End If
-
-            End If
-        Catch ex As Exception
-
-            Dim AdditionalString = ""
-            If Not String.IsNullOrEmpty(LastProcessedObjectForDebug) Then
-                AdditionalString = "Attempted to process this object: " + LastProcessedObjectForDebug
-            End If
-
-            Log.Error(ex, "Error occurred while working with reference file. " + AdditionalString)
-
-        End Try
-
-
-        Try
-
-            Dim FileName = Path.Combine(Catalog, "1Cv8.lgd")
-
-            If My.Computer.FileSystem.FileExists(FileName) Then
-
+            Try
                 Dim Conn = New SQLite.SQLiteConnection("Data Source=" + FileName)
                 Conn.Open()
                 Dim Command = New SQLite.SQLiteCommand
@@ -1093,12 +1158,41 @@ Public Class EventLogProcessor
                 Conn.Dispose()
 
                 SaveReferenceValuesToDatabase()
+            Catch ex As Exception
+                Log.Error(ex, "Error occurred while working with reference tables")
+            End Try
+
+        Else
+
+            Dim LastProcessedObjectForDebug As String = ""
+            FileName = Path.Combine(Catalog, "1Cv8.lgf")
+
+            If My.Computer.FileSystem.FileExists(FileName) Then
+
+                Try
+
+                    Dim FI = My.Computer.FileSystem.GetFileInfo(FileName)
+
+                    If FI.LastWriteTime >= LastReferenceUpdate Then
+
+                        LoadReferenceFromTheTextFile(FileName, LastProcessedObjectForDebug)
+
+                    End If
+
+                Catch ex As Exception
+
+                    Dim AdditionalString = ""
+                    If Not String.IsNullOrEmpty(LastProcessedObjectForDebug) Then
+                        AdditionalString = "Attempted to process this object: " + LastProcessedObjectForDebug
+                    End If
+
+                    Log.Error(ex, "Error occurred while working with reference file. " + AdditionalString)
+
+                End Try
 
             End If
 
-        Catch ex As Exception
-            Log.Error(ex, "Error occurred while working with reference tables")
-        End Try
+        End If
 
     End Sub
 
@@ -1199,7 +1293,7 @@ Public Class EventLogProcessor
                                             [eventCode],
                                             [comment],
                                             [metadataCodes],
-                                            [sessionDataSplitCode],--
+                                            [sessionDataSplitCode],
                                             [dataType],
                                             [data],
                                             [dataPresentation],
@@ -1207,11 +1301,15 @@ Public Class EventLogProcessor
                                             [primaryPortCode],
                                             [secondaryPortCode]
                                         FROM [EventLog] 
-                                        WHERE [rowID] > @LastEventNumber83 
+                                        WHERE [rowID] > @LastEventNumber83 AND [date] >= @MinimumDate
                                         ORDER BY 1
                                         LIMIT 1000"
 
                 Command.Parameters.AddWithValue("LastEventNumber83", LastEventNumber83)
+
+                Dim noOfSeconds As Int64 = (LoadEventsStartingAt - New Date).TotalSeconds
+                Command.Parameters.AddWithValue("MinimumDate", noOfSeconds * 10000)
+
                 Dim rs = Command.ExecuteReader
 
                 Dim HasData = rs.HasRows
@@ -1226,11 +1324,11 @@ Public Class EventLogProcessor
                     OneEvent.TransactionStatus = rs("transactionStatus")
                     OneEvent.TransactionMark = rs("transactionID")
 
-                    OneEvent.TransactionStartTime = New Date().AddYears(2000)
-
                     Try
                         If Not rs("transactionDate") = 0 Then
                             OneEvent.TransactionStartTime = New Date().AddSeconds(Convert.ToInt64(rs("transactionDate") / 10000))
+                        Else
+                            OneEvent.TransactionStartTime = New Date().AddYears(2000)
                         End If
                     Catch ex As Exception
                     End Try
@@ -1265,34 +1363,26 @@ Public Class EventLogProcessor
                     OneEvent.SessionNumber = rs("session")
                     OneEvent.SessionDataSplitCode = rs("sessionDataSplitCode")
 
-                    OneEvent.Transaction = ""
+                    'OneEvent.Transaction = ""
                     OneEvent.EventType = ""
 
-
-
                     EventsList.Add(OneEvent)
-
-                    If EventsList.Count >= 1000 Then
-                        'Console.WriteLine("Выгрузка 1000 событий: " + Now.ToString)
-                        SaveEventsToSQL()
-                    End If
 
                     LastEventNumber83 = OneEvent.RowID
 
                 End While
 
-
                 rs.Close()
 
-                SaveEventsToSQL()
+                If EventsList.Count > 0 Then
+                    SaveEventsToSQL()
+                End If
 
                 If Not HasData Then
                     Exit While
                 End If
 
             End While
-
-
 
 
             Command.Dispose()
@@ -1484,6 +1574,10 @@ Public Class EventLogProcessor
         OneEvent.DateTime = Date.ParseExact(Array(0), "yyyyMMddHHmmss", provider)
         OneEvent.TransactionStatus = Array(1)
 
+        If OneEvent.DateTime < LoadEventsStartingAt Then
+            Exit Sub
+        End If
+
         Dim TransStr = Array(2).ToString.Replace("}", "").Replace("{", "")
         Dim TransDate = From16To10(TransStr.Substring(0, TransStr.IndexOf(",")))
 
@@ -1560,7 +1654,7 @@ Public Class EventLogProcessor
 
         While True
 
-            Console.WriteLine(Now.ToShortTimeString + " Start new iteration...")
+            Console.WriteLine(Now.ToLongTimeString + " Start new iteration...")
 
             Try
 
